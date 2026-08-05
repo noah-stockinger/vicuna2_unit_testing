@@ -37,15 +37,17 @@ macro(add_unit_test TEST_NAME)
                     OUTPUT_VARIABLE TEST_CASE_NUM)
     #If trace option is selected, provide the paths for the .vcd trace files.          
     if(TRACE)
-        set(VCD_TRACE_ARGS "${BUILD_DIR}/Testing/last_test_sig.vcd")
+        set(VCD_TRACE_FLAG "--trace")
+        set(VCD_TRACE_ARG "${BUILD_DIR}/vector-tests/test_${TEST_NAME}_sig.vcd")
     else()
-        set(VCD_TRACE_ARGS "")
+        set(VCD_TRACE_FLAG "")
+        set(VCD_TRACE_ARG "")
     endif()
 	              
 
     #Add Test
     add_test(NAME ${TEST_NAME}
-             COMMAND ${MODEL_DIR}/verilated_model ${BUILD_DIR}/vector-tests/prog_${TEST_NAME}.txt 32 4194304 ${MEM_LATENCY} 1 ${TEST_NAME} ${VREG_W} ${TEST_CASE_NUM} ${VCD_TRACE_ARGS}
+             COMMAND ${MODEL_DIR}/verilated_model ${BUILD_DIR}/vector-tests/prog_${TEST_NAME}.txt ${MEM_PORTS} ${MEM_W} 4194304 ${MEM_LATENCY} 1 ${TEST_NAME} ${VREG_W} ${TEST_CASE_NUM} ${VCD_TRACE_FLAG} ${VCD_TRACE_ARG}
              WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
     message(STATUS "Successfully added ${TEST_NAME}")
@@ -142,22 +144,24 @@ macro(add_legacy_test TEST_NAME)
                        COMMAND echo -n "${TEST_BUILD_PATH}/${TEST_NAME}_result.txt " >> prog_${TEST_NAME}.txt
                        COMMAND readelf -s ${folder}-${TEST_NAME}.elf | sed '2,13 s/ //1' | grep vdata_start | cut -d " " -f 6 | tr [=["\n"]=] " " >> prog_${TEST_NAME}.txt
                        COMMAND readelf -s ${folder}-${TEST_NAME}.elf | sed '2,13 s/ //1' | grep vdata_end | cut -d " " -f 6 | tr [=["\n"]=] " " >> prog_${TEST_NAME}.txt
-                       COMMAND ${CMAKE_OBJDUMP} -D ${folder}-${TEST_NAME}.elf > ${TEST_NAME}_dump.txt)
+                       COMMAND ${CMAKE_OBJDUMP} -D ${folder}-${TEST_NAME}.elf > ${TEST_NAME}_dump.txt
+                       )
     
      
     #If trace option is selected, provide the paths for the .csv and .vcd trace files.  Due to argument parsing in verilator_main.cpp, both must be provided                
     if(TRACE)
-        set(MEM_TRACE_ARGS "${BUILD_DIR}/Testing/last_test_mem.csv")
-        set(VCD_TRACE_ARGS "${BUILD_DIR}/Testing/last_test_sig.vcd")
+        set(VCD_TRACE_FLAG "--trace")
+        set(VCD_TRACE_ARG "${BUILD_DIR}/legacy/${folder}/test_${TEST_NAME}_sig.vcd")
     else()
-        set(MEM_TRACE_ARGS "")
-        set(VCD_TRACE_ARGS "")
+        set(VCD_TRACE_FLAG "")
+        set(VCD_TRACE_ARG "")
     endif()
-	              
+
+	set(TEST_CASE_NUM 1)# only one test case(For compatibility with chipsalliance, start counting at 2)
 
     #Add Test
     add_test(NAME ${folder}-${TEST_NAME}
-             COMMAND cmake -DTEST_NAME=${TEST_NAME} -DBUILD_DIR=${TEST_BUILD_PATH} -DVERILATED_DIR=${MODEL_DIR} -DMEM_TRACE_ARGS=${MEM_TRACE_ARGS} -DMEM_LATENCY=${MEM_LATENCY} -DMEM_W=${MEM_W} -DVCD_TRACE_ARGS=${VCD_TRACE_ARGS} -DTEST_NAME=${TEST_NAME} -DVREG_W=${VREG_W} -P ${CMAKE_TOP}/run_legacy_test.cmake
+             COMMAND cmake -DMODEL_DIR=${MODEL_DIR} -DBUILD_DIR=${TEST_BUILD_PATH} -DTEST_NAME=${TEST_NAME} -DMEM_PORTS=${MEM_PORTS} -DMEM_W=${MEM_W} -DMEM_LATENCY=${MEM_LATENCY} -DVREG_W=${VREG_W} -DTEST_CASE_NUM=${TEST_CASE_NUM} -DVCD_TRACE_FLAG=${VCD_TRACE_FLAG} -DVCD_TRACE_ARG=${VCD_TRACE_ARG} -P ${CMAKE_TOP}/run_legacy_test.cmake
              WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
     message(STATUS "Successfully added Legacy Test ${folder}-${TEST_NAME}")
@@ -202,7 +206,7 @@ macro(add_legacy_test_Spike TEST_NAME)
              WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
     message(STATUS "Successfully added Legacy Test ${folder}-${TEST_NAME}-Spike")
-    set_tests_properties(${folder}-${TEST_NAME}-Spike PROPERTIES TIMEOUT 60) #TODO: Find a reasonable timeout for these tests
+    set_tests_properties(${folder}-${TEST_NAME}-Spike PROPERTIES TIMEOUT 10) #TODO: Find a reasonable timeout for these tests
 
 endmacro()
 
