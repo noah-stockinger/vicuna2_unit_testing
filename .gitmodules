@@ -4,7 +4,7 @@
 	ignore = dirty
 [submodule "rtl/vicuna2_core"]
 	path = rtl/vicuna2_core
-	url = https://github.com/vproc/vicuna2_core.git
+	url = git@github.com:noah-stockinger/vicuna2_core.git
 [submodule "rtl/fpu_ss"]
 	path = rtl/fpu_ss
 	url = https://github.com/ParkerJones567/fpu_ss.git
