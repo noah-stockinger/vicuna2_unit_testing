@@ -498,6 +498,7 @@ elseif( ${SCALAR_CORE} STREQUAL "cv32a60x" ) #TODO: Verify/Test support for floa
                                 ${RISCV_ZVFH}
                                 ${RISCV_ZVBB}
                                 ${RISCV_ZVBC}
+                                "-DVECTOR_CUSTOM"
                                 ${COMMIT_AND_ISSUE}
                                 -CFLAGS "-std=gnu++14 -O2")
 else()
