@@ -15,5 +15,5 @@ set(VREG_W 128)
 math(EXPR VMEM_TOTAL_W "${VMEM_PORTS} * ${VMEM_W}")
 
 # Tokens must match the sed list in vicuna2_core/config.mk:119; a missing one silently drops that unit's pipeline.
-set(VPROC_PIPELINES "${VMEM_TOTAL_W}:VLSU 32:VXRESULT,VCUSTOM,VSLD,VDIV,VALU,VMUL,VREDSUM")
+set(VPROC_PIPELINES "${VMEM_TOTAL_W}:VLSU 32:VXRESULT,VSLD,VDIV,VALU,VMUL,VREDSUM")
 
